@@ -1,0 +1,50 @@
+<html><body>
+<script src="https://cdn.jsdelivr.net/npm/buttplug@1.0.14/dist/web/buttplug.min.js" integrity="sha256-7KTanv3NixZdkIVK8qf3whxGk6UP30x0b0nSyDpfHts=" crossorigin="anonymous"></script>
+<div onclick="startScanning()">
+  click to start scanning
+</div>
+<div style="position:absolute; bottom:0;" id=log></div>
+<script>
+var client;
+
+function log(msg) {
+  msg = Date.now() + ": " + msg;
+  console.log(msg);
+  var l = document.getElementById('log');
+  l.append(document.createElement("br"));
+  l.append(msg);
+}
+
+doInit = async function () {
+    log("Init start");
+    const connector = new Buttplug.ButtplugEmbeddedConnectorOptions();
+
+   try {
+      await Buttplug.buttplugInit();
+    } catch (e) {
+      log("Failed to init: " + e);
+    }
+
+    client = new Buttplug.ButtplugClient("JSFiddle");
+    log("Waiting for connect");
+    await client.connect(connector);
+
+    log("adding listeners");
+    client.addListener("deviceadded", (device) => {
+      log(`Device Connected: ${device.Name}`);
+    });
+    client.addListener("deviceremoved", (device) => {
+        log(`Device Removed: ${device.Name}`)
+      });
+    client.addListener("scanningfinished", () => {
+      log("Scanning finished");
+    });
+  };
+
+doInit().then();
+
+function startScanning() {
+    client.startScanning().then(function() { log("Scanning started") }).catch(function() { log("scanning did not start" )});
+}
+</script>
+</body></html>
